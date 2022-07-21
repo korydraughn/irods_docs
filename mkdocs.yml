@@ -69,9 +69,16 @@ nav:
     - Metadata: 'icommands/metadata.md'
     - Tickets: 'icommands/tickets.md'
     - Groupadmin: 'icommands/groupadmin.md'
+ - Policy Cookbook:
+    - Home: 'policy_cookbook/index.md'
+    - Metadata-Based Synchronization: 'policy_cookbook/metadata_based_synchronization.md'
+    - Naming Schemes and Conventions: 'policy_cookbook/naming_schemes_and_conventions.md'
+    - Sharing data across PEPs: 'policy_cookbook/sharing_data_across_peps.md'
+    - Simulating User Quotas: 'policy_cookbook/simulating_user_quotas.md'
  - Developers:
     - Doxygen: 'doxygen/index.html'
     - Contributing: 'developers/contributing.md'
     - Development Tools: 'developers/development_tools.md'
+    - Library Examples: 'developers/library_examples.md'
     - Logging: 'developers/logging.md'
 
