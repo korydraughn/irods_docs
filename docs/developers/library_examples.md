@@ -1,10 +1,148 @@
 # Library Examples
 
-## C
+## Programming Language: C
 
-Coming Soon ...
+### Connecting to an iRODS server
 
-## C++
+Demonstrates how to use `rcConnect`, `clientLogin`, and `rcDisconnect`.
+
+```c++
+#include <irods/getRodsEnv.h>
+#include <irods/rcConnect.h>
+
+void connecting_to_an_irods_server()
+{
+    rodsEnv env;
+
+    if (const int ec = getRodsEnv(&env); ec != 0) {
+        // Failed to load the local environment information (i.e. irods_environment.json).
+        // Handle error.
+    }
+
+    rErrMsg_t error;
+    RcComm* conn = rcConnect(env.rodsHost,
+                             env.rodsPort,
+                             env.rodsUserName,
+                             env.rodsZone,
+                             0,
+                             &error);
+
+    if (!conn) {
+        // Failed to connect to server.
+        // Handle error.
+    }
+
+    // We've successfully connected to an iRODS server.
+    // Here's how you authenticate (i.e. log in) with the server.
+    if (const int ec = clientLogin(conn); ec != 0) {
+        // Failed to authenticate with server.
+        // Handle error.
+    }
+
+    //
+    // Use the "conn" pointer to execute operations.
+    //
+
+    // When done, call rcDisconnect() so that the server knows the client is finished.
+    // This lets the server know it is okay to deallocate resources.
+    rcDisconnect(conn);
+}
+```
+
+### Iterating over a collection
+
+Demonstrates how to use `rclOpenCollection`, `rclReadCollection` and `rclCloseCollection`.
+
+```cpp
+#include <irods/miscUtil.h>
+
+#include <iostream>
+
+void iterating_over_a_collection()
+{
+    RcComm* conn = // Our iRODS connection.
+
+    // We need a handle to manage the state between the client and server.
+    //
+    // The curly braces here are important (in C++) because they instruct the compiler to zero
+    // out the memory. This is equivalent to calling the following:
+    //
+    //    std::memset(&handle, 0, sizeof(CollHandle));
+    //
+    CollHandle handle{};
+
+    // The first thing we need to do is open the collection. This should feel familiar to people
+    // who have used POSIX opendir.
+    if (const int ec = rclOpenCollection(conn, "/tempZone/home/rods", flags, &handle); ec < 0) {
+        // Failed to open the collection.
+        // Handle error.
+    }
+
+    //
+    // Now that the collection is open, we can read entries from it.
+    //
+
+    // This will hold information about a single entry in the collection.
+    CollEnt entry{}; 
+
+    // This helps us conform to the API requirements.
+    CollEnt* pentry = &entry;
+
+    while (true) {
+        // Read a single entry from the collection and populate the object pointed to by "pentry"
+        // with that information. Every call to this function moves the collection iterator forward.
+        if (const int ec = rclReadCollection(conn, &handle, &pentry); ec < 0) {
+            if (ec == CAT_NO_ROWS_FOUND) {
+                // We've iterated over all entries in the collection.
+                break;
+            }
+
+            // Something bad happened while processing the request.
+            // Handle error.
+            break;
+        }
+
+        // "entry" now holds information about the previously read collection entry.
+        // Copy the information you need from "entry" for post processing. This is important to
+        // remember because as soon as "rclReadCollection" is called, "entry" will be updated with
+        // new information about a different object.
+
+        // Let's print the logical path and the checksum for each entry.
+        //
+        // The CollEnt type contains several other member variables. Take a look at miscUtil.h to see
+        // what is available.
+        switch (entry.objType) {
+            case COLL_OBJ_T:
+                // Collections don't support checksums, so we only print the logical path.
+                std::cout << "Collection: " << entry.collName << '\n';
+                break;
+
+            case DATA_OBJ_T:
+                std::cout << "Data Object: " << entry.dataName << ", Checksum: " << entry.chksum << '\n';
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    // The "rcl*" collection functions manage memory for us. These functions will free any heap
+    // allocated memory for us. Attempting to free any memory return from "rclReadCollection"
+    // will result in a crash.
+
+    rclCloseCollection(&handle);
+}
+```
+
+### Querying the Catalog using General Queries
+
+Coming soon ...
+
+### Querying the Catalog using Specific Queries
+
+Coming soon ...
+
+## Programming Language: C++
 
 ### client_connection
 
@@ -52,9 +190,8 @@ void connecting_to_an_irods_server()
     // Use this for C APIs.
     auto* pointer = static_cast<RcComm*>(conn);
 
-    // Because connections can be released from the pool, it makes sense to provide an
-    // operation for checking if the connection proxy still manages a valid connection.
-    // Connection objects are now convertible to bool.
+    // You can also check if the connection manages a connection.
+    // This only checks whether the underlying RcComm pointer points to an object.
     if (conn) {
         // Do something with the connection ...
     }
