@@ -1,10 +1,16 @@
 # Metadata-based Synchronization
 
-This example demonstrates how to use metadata to synchronize asynchronous tasks run by the Delay Server.
+These examples demonstrate how to synchronize rules using metadata.
 
-## How to do it ...
+- live systems will have multiple rules being executed
+- these techniques help to sync any number of rules
+- \*one technique relies on the fact that iRODS doesn't allow duplicate AVUs
 
-```python
+## Example 1: Controling execution order
+
+### How to do it ...
+
+```
 is_metadata_attached_to_collection(*collection, *attribute_name)
 {
     *attached = false;
@@ -44,7 +50,13 @@ synchronized_delay_rules_example()
         }
     }
 }
+```
 
+## Example 2: Locks with acquire-release semantics
+
+### How to do it ...
+
+```
 acquire_metadata_lock(*collection, *lock_name)
 {
     # TODO: Create an issue for this.
@@ -67,6 +79,23 @@ release_metadata_lock(*collection, *lock_name)
 
 synchronized_delay_rules_example()
 {
-    
+    *number_of_delay_rules = 5;
+
+    # Schedule multiple delay rules.
+    for (*i = 0; *i < *number_of_delay_rules; *i = *i + 1) {
+        *task_id = *i;
+
+        delay("<INST_NAME>irods_rule_engine_plugin-irods_rule_language-instance</INST_NAME>") {
+            acquire_metadata_lock('/tempZone/home/rods', 'irods::mutex');
+            writeLine("serverLog", "(Delay Rule #*task_id) Acquired lock.");
+
+            # Simulate work.
+            msiSleep('2', '0');
+
+            # Release the lock so that other delay rules can enter the critical section.
+            writeLine("serverLog", "(Delay Rule #*task_id) Released lock.");
+            release_metadata_lock('/tempZone/home/rods', 'irods::mutex');
+        }
+    }
 }
 ```
