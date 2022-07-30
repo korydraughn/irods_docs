@@ -62,6 +62,11 @@ acquire_metadata_lock(*collection, *lock_name)
     # TODO: Create an issue for this.
     # e.g. msiSetIfNotSet, msiTestAndSetMetadata, etc
 
+    # TODO: This needs to incorporate a timer. Without a timer, the locks can result in a deadlock.
+    # One way to handle this is by changing this to have "try" semantics. Basically, try to get the lock
+    # and if you can't, return and let the caller decide what to do next. This gives the caller a chance
+    # to stop after some number of attempts.
+    # 
     # Wait until we're able to add the metadata to the target collection.
     while (errorcode(msiModAVUMetadata('-C', *collection, 'add', *lock_name, 'metadata_lock', '')) < 0) {
         msiSleep('1', '0');
