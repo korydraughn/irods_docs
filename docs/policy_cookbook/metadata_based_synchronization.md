@@ -86,15 +86,18 @@ synchronized_delay_rules_example()
         *task_id = *i;
 
         delay("<INST_NAME>irods_rule_engine_plugin-irods_rule_language-instance</INST_NAME>") {
-            acquire_metadata_lock('/tempZone/home/rods', 'irods::mutex');
-            writeLine("serverLog", "(Delay Rule #*task_id) Acquired lock.");
+            # Looping helps to simulate contention on the locking mechanism.
+            for (*j = 0; *j < *iterations; *j = *j + 1) {
+                acquire_metadata_lock('/tempZone/home/rods', 'irods::mutex');
+                writeLine("serverLog", "(Delay Rule #*task_id) Acquired lock.");
 
-            # Simulate work.
-            msiSleep('2', '0');
+                # Simulate work.
+                msiSleep('2', '0');
 
-            # Release the lock so that other delay rules can enter the critical section.
-            writeLine("serverLog", "(Delay Rule #*task_id) Released lock.");
-            release_metadata_lock('/tempZone/home/rods', 'irods::mutex');
+                # Release the lock so that other delay rules can enter the critical section.
+                writeLine("serverLog", "(Delay Rule #*task_id) Released lock.");
+                release_metadata_lock('/tempZone/home/rods', 'irods::mutex');
+            }
         }
     }
 }
