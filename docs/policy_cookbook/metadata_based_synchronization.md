@@ -6,7 +6,7 @@ These examples demonstrate how to synchronize rules using metadata.
 - these techniques help to sync any number of rules
 - \*one technique relies on the fact that iRODS doesn't allow duplicate AVUs
 
-## Example 1: Controling execution order
+## Example 1: Controlling execution order
 
 ### How to do it ...
 
