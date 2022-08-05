@@ -156,7 +156,7 @@ void iterating_over_a_collection()
 ```cpp
 #include <irods/genQuery.h>
 
-void print_all_resources_in_descending_order_of_resource_id()
+void fetch_resource_information_using_a_general_query()
 {
     RcComm* conn = // Our iRODS connection.
 
