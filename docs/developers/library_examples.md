@@ -156,6 +156,8 @@ void iterating_over_a_collection()
 ```cpp
 #include <irods/genQuery.h>
 
+#include <fmt/format.h>
+
 void fetch_resource_information_using_a_general_query()
 {
     RcComm* conn = // Our iRODS connection.
@@ -182,17 +184,13 @@ void fetch_resource_information_using_a_general_query()
 
     // We're all set. Execute the query and iterate/print the results!
     while (true) {
-        const int ec = rcGenQuery(conn, &input, &output);
-
-        if (ec != 0) {
+        if (const int ec = rcGenQuery(conn, &input, &output); ec != 0) {
             // Break out of the loop if we there aren't any results.
             if (ec == CAT_NO_ROWS_FOUND) {
                 break;
             }
 
             // Failed to execute query.
-            // Handle error and deallocate any memory used by the GenQueryInp object.
-            clearGenQueryInp(&input);
             break;
         }
 
