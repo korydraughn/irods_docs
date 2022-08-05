@@ -153,6 +153,8 @@ void iterating_over_a_collection()
 
 ### Querying the Catalog using General Queries
 
+Demonstrates how to use `rcGenQuery` to fetch information from the catalog.
+
 ```cpp
 #include <irods/genQuery.h>
 
@@ -185,12 +187,13 @@ void fetch_resource_information_using_a_general_query()
     // We're all set. Execute the query and iterate/print the results!
     while (true) {
         if (const int ec = rcGenQuery(conn, &input, &output); ec != 0) {
-            // Break out of the loop if we there aren't any results.
+            // Break out of the loop if there aren't any results.
             if (ec == CAT_NO_ROWS_FOUND) {
                 break;
             }
 
             // Failed to execute query.
+            // Handle error.
             break;
         }
 
