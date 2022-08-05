@@ -229,11 +229,12 @@ void print_all_resources_in_descending_order_of_resource_id()
 
         // Deallocate resources for this page of the resultset before calling "rcGenQuery" again.
         // This keeps the application from leaking memory.
-        clearGenQueryInp(&input);
+        clearGenQueryOut(output);
     }
 
     // Don't forget to clean up and release any resources used by the queries.
     clearGenQueryInp(&input);
+    clearGenQueryOut(output);
 }
 ```
 
