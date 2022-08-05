@@ -1,6 +1,6 @@
 # Library Examples
 
-## Programming Language: C
+## C API
 
 ### Connecting to an iRODS server
 
@@ -8,6 +8,7 @@ Demonstrates how to use `rcConnect`, `clientLogin`, and `rcDisconnect`.
 
 ```c++
 #include <irods/getRodsEnv.h>
+#include <irods/rodsClient.h>
 #include <irods/rcConnect.h>
 
 void connecting_to_an_irods_server()
@@ -17,7 +18,13 @@ void connecting_to_an_irods_server()
     if (const int ec = getRodsEnv(&env); ec != 0) {
         // Failed to load the local environment information (i.e. irods_environment.json).
         // Handle error.
+        return;
     }
+
+    // This is the safest place to load all client-side API plugins.
+    // This step is required for proper interaction with a 4.3.0 server. Forgetting to call this
+    // function will result in errors if subsequent API calls depend on client-side plugins.
+    load_client_api_plugins();
 
     rErrMsg_t error;
     RcComm* conn = rcConnect(env.rodsHost,
@@ -30,13 +37,16 @@ void connecting_to_an_irods_server()
     if (!conn) {
         // Failed to connect to server.
         // Handle error.
+        return;
     }
 
     // We've successfully connected to an iRODS server.
     // Here's how you authenticate (i.e. log in) with the server.
     if (const int ec = clientLogin(conn); ec != 0) {
         // Failed to authenticate with server.
-        // Handle error.
+        // Handle error and disconnect.
+        rcDisconnect(conn);
+        return;
     }
 
     //
@@ -49,7 +59,7 @@ void connecting_to_an_irods_server()
 }
 ```
 
-### Iterating over a collection
+### Iterating over a collection (client-side)
 
 Demonstrates how to use `rclOpenCollection`, `rclReadCollection` and `rclCloseCollection`.
 
@@ -71,11 +81,20 @@ void iterating_over_a_collection()
     //
     CollHandle handle{};
 
+    // The collection to iterate over.
+    char logical_path[] = "/tempZone/home/alice";
+
+    // "rclOpenCollection" can be instructed to gather additional information for each entry
+    // by bitwise-OR'ing one or more bits. See miscUtil.h for the list of available options.
+    // In this example, the default information is good enough.
+    const int flags = 0;
+
     // The first thing we need to do is open the collection. This should feel familiar to people
     // who have used POSIX opendir.
-    if (const int ec = rclOpenCollection(conn, "/tempZone/home/rods", flags, &handle); ec < 0) {
+    if (const int ec = rclOpenCollection(conn, logical_path, flags, &handle); ec < 0) {
         // Failed to open the collection.
         // Handle error.
+        return;
     }
 
     //
@@ -85,13 +104,10 @@ void iterating_over_a_collection()
     // This will hold information about a single entry in the collection.
     CollEnt entry{}; 
 
-    // This helps us conform to the API requirements.
-    CollEnt* pentry = &entry;
-
     while (true) {
-        // Read a single entry from the collection and populate the object pointed to by "pentry"
-        // with that information. Every call to this function moves the collection iterator forward.
-        if (const int ec = rclReadCollection(conn, &handle, &pentry); ec < 0) {
+        // Read a single entry from the collection and fill "entry" with that information.
+        // Every call to this function moves the collection iterator forward.
+        if (const int ec = rclReadCollection(conn, &handle, &entry); ec < 0) {
             if (ec == CAT_NO_ROWS_FOUND) {
                 // We've iterated over all entries in the collection.
                 break;
@@ -122,6 +138,7 @@ void iterating_over_a_collection()
                 break;
 
             default:
+                std::cout << "Unknown object type\n";
                 break;
         }
     }
@@ -136,13 +153,95 @@ void iterating_over_a_collection()
 
 ### Querying the Catalog using General Queries
 
-Coming soon ...
+```cpp
+#include <irods/genQuery.h>
+
+void print_all_resources_in_descending_order_of_resource_id()
+{
+    RcComm* conn = // Our iRODS connection.
+
+    GenQueryInp input{}; // Curly braces are equivalent to using std::memset to clear the object.
+
+    // Fetch the maximum number of rows for a single page.
+    // This is specific to iRODS. The maximum page size has nothing to do with the database.
+    input.maxRows = MAX_SQL_ROWS;
+
+    // Here's where we specify the columns we want to fetch, along with various options.
+    addInxIval(&input.selectInp, COL_R_RESC_ID,   ORDER_BY_DESC /* Sort by resource id in descending order */);
+    addInxIval(&input.selectInp, COL_R_RESC_NAME, 0 /* No special options on this column */);
+
+    // We can apply conditions to the query as well.
+    // If we wanted to find all resources whose name starts with the letter 'd', we'd do the following.
+    addInxVal(&input.sqlCondInp, COL_R_RESC_NAME, "like 'd%'");
+
+    // So, we've set up our query. Now, we need to execute it. To do that, "rcGenQuery" requires that
+    // we pass it a pointer. The pointer we give to "rcGenQuery" will point to memory holding the
+    // results of our query. Following execution of the query, if nothing goes wrong, we will be able
+    // to use the pointer to iterate over the results. More on that later.
+    GenQueryOut* output{};
+
+    // We're all set. Execute the query and iterate/print the results!
+    while (true) {
+        const int ec = rcGenQuery(conn, &input, &output);
+
+        if (ec != 0) {
+            // Break out of the loop if we there aren't any results.
+            if (ec == CAT_NO_ROWS_FOUND) {
+                break;
+            }
+
+            // Failed to execute query.
+            // Handle error and deallocate any memory used by the GenQueryInp object.
+            clearGenQueryInp(&input);
+            break;
+        }
+
+        //
+        // At this point, we know "output" contains the information we're interested in.
+        // All we have to do is print it.
+        //
+
+        // Iterate over each row.
+        for (int row = 0; row < output->rowCnt; ++row) {
+            fmt::print("row: ");
+
+            // Iterate over each attribute (i.e. this is a column or the result of an aggregate function).
+            // Each SqlResult object represents a single column in the resultset. This loop iterates over
+            // all the attributes and jumps to the correct index associated to the row being processed.
+            for (int attr = 0; attr < output->attriCnt; ++attr) {
+                const SqlResult* sql_result = &output->sqlResult[attr];
+                const char* value = sql_result->value + (row * sql_result->len);
+                fmt::print("[{}] ", value);
+            }
+
+            fmt::print("\n");
+        }
+
+        // There's no more data, exit the loop.
+        if (output->continueInx <= 0) {
+            break;
+        }
+
+        // To move to the next page of the resultset, copy the continue index contained in the output
+        // structure to the continue index of the input structure. Forgetting to do this will result in
+        // an infinite loop!
+        input.continueInx = output->continueInx;
+
+        // Deallocate resources for this page of the resultset before calling "rcGenQuery" again.
+        // This keeps the application from leaking memory.
+        clearGenQueryInp(&input);
+    }
+
+    // Don't forget to clean up and release any resources used by the queries.
+    clearGenQueryInp(&input);
+}
+```
 
 ### Querying the Catalog using Specific Queries
 
 Coming soon ...
 
-## Programming Language: C++
+## C++ API
 
 ### client_connection
 
