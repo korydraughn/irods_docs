@@ -63,18 +63,15 @@ nav:
     - Troubleshooting: 'system_overview/troubleshooting.md'
     - Limitations and Restrictions: 'system_overview/limitations_and_restrictions.md'
     - Tips and Tricks: 'system_overview/tips_and_tricks.md'
+    - Policy Cookbook: 'system_overview/policy_cookbook.md'
+ - Administrators:
+    - Policy Cookbook: 'administrators/policy_cookbook.md'
  - iCommands:
     - Administrator: 'icommands/administrator.md'
     - User: 'icommands/user.md'
     - Metadata: 'icommands/metadata.md'
     - Tickets: 'icommands/tickets.md'
     - Groupadmin: 'icommands/groupadmin.md'
- - Policy Cookbook:
-    - Home: 'policy_cookbook/index.md'
-    - Metadata-Based Synchronization: 'policy_cookbook/metadata_based_synchronization.md'
-    - Naming Schemes and Conventions: 'policy_cookbook/naming_schemes_and_conventions.md'
-    - Sharing data across PEPs: 'policy_cookbook/sharing_data_across_peps.md'
-    - Simulating User Quotas: 'policy_cookbook/simulating_user_quotas.md'
  - Developers:
     - Doxygen: 'doxygen/index.html'
     - Contributing: 'developers/contributing.md'
