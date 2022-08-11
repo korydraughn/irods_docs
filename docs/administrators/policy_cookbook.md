@@ -87,34 +87,38 @@ This can be used to generate keys for `temporaryStorage` as well. See [Sharing d
 
 When a group of rules are related, include a rule name prefix to indicate that. You can find several examples of this in other programming languages.
 
-Below is an example that demonstrates how this may look. The rules presented make up an imaginary Native Rule Language synchronization library. In this example, the rule name prefix, `mutex_` is used. This provides signal to the person writing the policy that these rules are related.
+Below is an example that demonstrates how this may look. The rules presented make up an imaginary Native Rule Language synchronization library. In this example, the rule name prefix, `mutex_` is used to provide signal to the person writing the policy that these rules are related. The body of the rules has been left out to not take away from the primary focus of the example.
 
 ```python
+#
 # Example Synchronization Library
 #
-# Body of rules are ignored for brevity.
 
 # Returns a handle to a newly allocated mutex object.
-mutex_create()
+mutex_create(*mutex_name) {}
+
+# Returns the handle of the mutex identified by *mutex_name.
+# Returns zero if the mutex does not exist.
+mutex_find(*mutex_name) {}
 
 # Tries to acquire the lock on *mutex.
 # Blocks until *mutex is acquired.
-mutex_lock(*mutex)
+mutex_lock(*mutex) {}
 
 # Tries to acquire the lock on *mutex.
-# Blocks until *mutex is acquired or *timeout has been violated.
-mutex_lock(*mutex, *timeout)
+# Blocks until *mutex is acquired or *timeout has been exceeded.
+mutex_lock(*mutex, *timeout) {}
 
 # Tries to acquire the lock on *mutex.
 # Returns true if the lock was acquired.
 # Returns false if the lock could not be acquired.
-mutex_try_lock(*mutex)
+mutex_try_lock(*mutex) {}
 
 # Releases the lock on *mutex.
-mutex_unlock(*mutex)
+mutex_unlock(*mutex) {}
 
 # Deallocates resources for *mutex.
-mutex_destroy(*mutex)
+mutex_destroy(*mutex) {}
 ```
 
 ## Sharing data across PEPs
