@@ -255,21 +255,22 @@ void fetch_information_about_a_collection_using_a_specific_query()
     SpecificQueryInp input{}; // Curly braces are equivalent to using std::memset to clear the object.
 
     // Specific queries are pre-defined SQL statements stored in the catalog.
-    // Administrators are the only iRODS users allowed to register specific queries. Specific queries allow
-    // administrators to do address the short-comings of GenQuery. For example, GenQuery can sometimes
-    // produce SQL that isn't very performant. For situations such as these, it may be better to write the
-    // SQL directly and expose it as a specific query.
+    // Administrators are the only iRODS users allowed to register specific queries.
+    //
+    // Specific queries allow administrators to address the limitations of general queries. For example,
+    // general queries can sometimes produce SQL that isn't very performant. For situations such as these,
+    // it may be better to write the SQL directly and expose it as a specific query.
     //
     // Now that we understand why a person may choose to use a specific query, let's see how to execute one.
-
+    //
     // To use a specific query, the query must be registered in iRODS.
     // You can view the full listing of specific queries by running the following icommand: iquest --sql ls
     //
     // Here, we'll be running a specific query that fetches the following information about a collection:
-    // - R_USER_MAIN.user_name
-    // - R_USER_MAIN.zone_name
-    // - R_TOKN_MAIN.token_name
-    // - R_USER_MAIN.user_type_name
+    // 1. R_USER_MAIN.user_name
+    // 2. R_USER_MAIN.zone_name
+    // 3. R_TOKN_MAIN.token_name
+    // 4. R_USER_MAIN.user_type_name
     //
     // Keep in mind that the column information is fetched in the order specificed by the specific query.
     char query_alias[] = "ShowCollAcls";
@@ -283,7 +284,7 @@ void fetch_information_about_a_collection_using_a_specific_query()
     char input_arg[] = "/tempZone/home/rods";
     input.args[0] = input_arg;
 
-    // IMPORTANT NOTE: Specific queries can accept up to ten arguments!
+    // IMPORTANT: Specific queries can accept up to ten arguments!
 
     // Fetch the maximum number of rows for a single page.
     // This is specific to iRODS. The maximum page size has nothing to do with the database.
