@@ -239,9 +239,116 @@ void fetch_resource_information_using_a_general_query()
 }
 ```
 
-### Querying the Catalog using Specific Queries
+### Querying the Catalog using Specific Queries (client-side)
 
-Coming soon ...
+Demonstrates how to use `rcSpecificQuery` to fetch information from the catalog.
+
+```cpp
+#include <irods/specificQuery.h>
+
+#include <fmt/format.h>
+
+void fetch_information_about_a_collection_using_a_specific_query()
+{
+    RcComm* conn = // Our iRODS connection.
+
+    SpecificQueryInp input{}; // Curly braces are equivalent to using std::memset to clear the object.
+
+    // Specific queries are pre-defined SQL statements stored in the catalog.
+    // Administrators are the only iRODS users allowed to register specific queries. Specific queries allow
+    // administrators to do address the short-comings of GenQuery. For example, GenQuery can sometimes
+    // produce SQL that isn't very performant. For situations such as these, it may be better to write the
+    // SQL directly and expose it as a specific query.
+    //
+    // Now that we understand why a person may choose to use a specific query, let's see how to execute one.
+
+    // To use a specific query, the query must be registered in iRODS.
+    // You can view the full listing of specific queries by running the following icommand: iquest --sql ls
+    //
+    // Here, we'll be running a specific query that fetches the following information about a collection:
+    // - R_USER_MAIN.user_name
+    // - R_USER_MAIN.zone_name
+    // - R_TOKN_MAIN.token_name
+    // - R_USER_MAIN.user_type_name
+    //
+    // Keep in mind that the column information is fetched in the order specificed by the specific query.
+    char query_alias[] = "ShowCollAcls";
+    input.sql = query_alias;
+
+    // The specific query, "ShowCollAcls", accepts one argument (indicated by the use of "?").
+    // Arguments for specific queries are denoted by the use of question marks just like with prepared
+    // statements in SQL.
+    //
+    // "ShowCollAcls" expects the absolute path to a collection as shown below.
+    char input_arg[] = "/tempZone/home/rods";
+    input.args[0] = input_arg;
+
+    // IMPORTANT NOTE: Specific queries can accept up to ten arguments!
+
+    // Fetch the maximum number of rows for a single page.
+    // This is specific to iRODS. The maximum page size has nothing to do with the database.
+    input.maxRows = MAX_SQL_ROWS;
+
+    // So, we've set up our query. Now, we need to execute it. To do that, "rcSpecificQuery" requires that
+    // we pass it a pointer. The pointer we give to "rcSpecificQuery" will point to memory holding the results
+    // of our query. Following execution of the query, if nothing goes wrong, we will be able to use the
+    // pointer to iterate over the results. More on that later.
+    GenQueryOut* output{};
+
+    // We're all set. Execute the query and iterate/print the results!
+    while (true) {
+        if (const int ec = rcSpecificQuery(conn, &input, &output); ec != 0) {
+            // Break out of the loop if there aren't any results.
+            if (ec == CAT_NO_ROWS_FOUND) {
+                break;
+            }
+
+            // Failed to execute query.
+            // Handle error.
+            break;
+        }
+
+        //
+        // At this point, we know "output" contains the information we're interested in.
+        // All we have to do is print it.
+        //
+
+        // Iterate over each row.
+        for (int row = 0; row < output->rowCnt; ++row) {
+            fmt::print("row: ");
+
+            // Iterate over each attribute (i.e. this is a column or the result of an aggregate function).
+            // Each SqlResult object represents a single column in the resultset. This loop iterates over
+            // all the attributes and jumps to the correct index associated to the row being processed.
+            for (int attr = 0; attr < output->attriCnt; ++attr) {
+                const SqlResult* sql_result = &output->sqlResult[attr];
+                const char* value = sql_result->value + (row * sql_result->len);
+                fmt::print("[{}] ", value);
+            }
+
+            fmt::print("\n");
+        }
+
+        // There's no more data, exit the loop.
+        if (output->continueInx <= 0) {
+            break;
+        }
+
+        // To move to the next page of the resultset, copy the continue index contained in the output
+        // structure to the continue index of the input structure. Forgetting to do this will result in
+        // an infinite loop!
+        input.continueInx = output->continueInx;
+
+        // Deallocate resources for this page of the resultset before calling "rcSpecificQuery" again.
+        // This keeps the application from leaking memory.
+        clearGenQueryOut(output);
+    }
+
+    // Don't forget to clean up and release any resources used by the queries.
+    clearKeyVal(&input.condInput);
+    clearGenQueryOut(output);
+}
+```
 
 ## C++ API
 
