@@ -66,7 +66,7 @@ Demonstrates how to use `rclOpenCollection`, `rclReadCollection` and `rclCloseCo
 ```cpp
 #include <irods/miscUtil.h>
 
-#include <iostream>
+#include <fmt/format.h>
 
 void iterating_over_a_collection()
 {
@@ -130,15 +130,15 @@ void iterating_over_a_collection()
         switch (entry.objType) {
             case COLL_OBJ_T:
                 // Collections don't support checksums, so we only print the logical path.
-                std::cout << "Collection: " << entry.collName << '\n';
+                fmt::print("Collection: {}\n", entry.collName);
                 break;
 
             case DATA_OBJ_T:
-                std::cout << "Data Object: " << entry.dataName << ", Checksum: " << entry.chksum << '\n';
+                fmt::print("Data Object: {}, Checksum: {}\n", entry.dataName, entry.chksum);
                 break;
 
             default:
-                std::cout << "Unknown object type\n";
+                fmt::print("Unknown object type.\n");
                 break;
         }
     }
@@ -368,6 +368,11 @@ void connecting_to_an_irods_server()
     rodsEnv env;
     _getRodsEnv(env);
 
+    // This is the safest place to load all client-side API plugins.
+    // This step is required for proper interaction with a 4.3.0 server. Forgetting to call this
+    // function will result in errors if subsequent API calls depend on client-side plugins.
+    load_client_api_plugins();
+
     // Creates a connection to an iRODS server based on the user's
     // $HOME/.irods/irods_environment.json file.
     irods::experimental::client_connection conn{env.rodsHost,
@@ -425,10 +430,17 @@ void init_connection_pool()
         // Handle error.
     }
 
+    // This is the safest place to load all client-side API plugins.
+    // This step is required for proper interaction with a 4.3.0 server. Forgetting to call this
+    // function will result in errors if subsequent API calls depend on client-side plugins.
+    //
+    // For systems using versions of iRODS older than 4.2.8, use "init_client_api_table".
+    load_client_api_plugins();
+
     const int connection_pool_size = 4;
     const int refresh_time_in_secs = 600;
 
-    // Creates a connection pool that manages 4 rcComm_t connections
+    // Creates a connection pool that manages four RcComm connections
     // and refreshes each connection every 600 seconds.
     irods::connection_pool pool{connection_pool_size,
                                 env.rodsHost,
@@ -449,13 +461,13 @@ void init_connection_pool()
     // The type returned from the pool is moveable, but it cannot be copied.
     auto conn = pool.get_connection();
 
-    // The object returned from the pool is a proxy for an rcComm_t and
-    // can be implicitly cast to a reference to rcComm_t.
-    rcComm_t& reference = conn;
+    // The object returned from the pool is a proxy for an RcComm and
+    // can be implicitly cast to a reference to RcComm.
+    RcComm& reference = conn;
 
     // Here is an example of casting to a pointer.
     // Use this for C APIs.
-    auto* pointer = static_cast<rcComm_t*>(conn);
+    auto* pointer = static_cast<RcComm*>(conn);
 
     // You can also take ownership of connections created by the connection pool.
     // Taking ownership means the connection is no longer managed by the connection pool
@@ -479,11 +491,6 @@ Available Since: v4.2.6
 
 Demonstrates how to iterate over collections as well as other functionality.
 Because it implements the ISO C++17 Standard Filesystem library, you may use the documentation at [cppreference](https://cppreference.com).
-
-Here are some helpful links:
-
-- [Filesystem Header Files](https://github.com/irods/irods/tree/4.3.0/lib/filesystem/include/irods/filesystem)
-- [Most commonly used Filesystem functions](https://github.com/irods/irods/blob/4.3.0/lib/filesystem/include/irods/filesystem/filesystem.hpp)
 
 ```c++
 // If you are writing server-side code and wish to enable the server-side API, you must
@@ -568,6 +575,9 @@ Demonstrates how to use `dstream` and `default_transport` to read and write data
 //
 #include <irods/transport/default_transport.hpp>
 
+#include <array>
+#include <string>
+
 void write_to_data_object()
 {
     // IMPORTANT!!!
@@ -585,10 +595,7 @@ void write_to_data_object()
     // objects such as dstream. "default_transport" is a wrapper around the iRODS C API for
     // reading and writing data objects.
     //
-    // You can add support for more transport protocols by implementing the following interface:
-    //
-    //     https://github.com/irods/irods/blob/master/lib/core/include/transport/transport.hpp
-    //
+    // You can add support for more transport protocols by implementing the transport interface.
     io::client::default_transport xport{conn};
 
     // Here, we are creating a new output stream for writing. If the data object exists, then
@@ -700,14 +707,13 @@ Demonstrates how to use `irods::query` to query the catalog.
 ```c++
 #include <irods/irods_query.hpp>
 
-#include <string>
-#include <iostream>
+#include <fmt/format.h>
 
-void print_all_resource_names(rcComm_t& _conn)
+void print_all_resource_names(RcComm& _conn)
 {
     // Print all resource names known to iRODS.
-    for (auto&& row : irods::query<rcComm_t>{&_conn, "select RESC_NAME"}) {
-        std::cout << row[0] << '\n';
+    for (auto&& row : irods::query<RcComm>{&_conn, "select RESC_NAME"}) {
+        fmt::print("{}\n", row[0]);
     }
 }
 ```
@@ -722,6 +728,7 @@ Demonstrates how to construct query iterators via an `irods::experimental::query
 #include <irods/query_builder.hpp>
 
 #include <vector>
+#include <string>
 
 void make_query()
 {
@@ -745,7 +752,7 @@ void make_query()
     // the connection and the SQL-like query statement.
     //
     // If the query string is empty, an exception will be thrown.
-    auto general_query = builder.build<rcComm_t>(conn, "select COLL_NAME");
+    auto general_query = builder.build<RcComm>(conn, "select COLL_NAME");
 
     // Use the query object as you normally would.
     for (auto&& row : general_query) {
@@ -765,7 +772,7 @@ void make_query()
     // So just bind the arguments and change the query type.
     auto specific_query = builder.type(irods::experimental::query_type::specific)
                                  .bind_arguments(args)
-                                 .build<rcComm_t>(conn, "ShowCollAcls");
+                                 .build<RcComm>(conn, "ShowCollAcls");
 
     for (auto&& row : specific_query) {
         // Process results ...
@@ -785,7 +792,8 @@ Demonstrates how to use `irods::query_processor` to asynchronously process each 
 ```c++
 #include <irods/query_processor.hpp>
 
-#include <iostream>
+#include <fmt/format.h>
+
 #include <vector>
 #include <mutex>
 
@@ -797,7 +805,7 @@ void process_all_query_results()
     // Protects the paths vector from simultaneous updates.
     std::mutex mtx;
 
-    using query_processor = irods::query_processor<rcComm_t>;
+    using query_processor = irods::query_processor<RcComm>;
 
     // This is where we create our query processor. As you can see, we pass it
     // the query string as well as the handler. The handler will process each row
@@ -833,7 +841,7 @@ void process_all_query_results()
 
     // Print all the results.
     for (auto&& path : paths) {
-        std::cout << "path: " << path << '\n';
+        fmt::print("path: {}\n", path.c_str());
     }
 }
 ```
@@ -897,8 +905,10 @@ Demonstrates how to use the `irods::with_durability` utility function to enable 
 
 ```c++
 #include <irods/with_durability.hpp>
+#include <irods/client_connection.hpp>
+#include <irods/filesystem.hpp>
 
-#include <irods/connection_pool.hpp>
+#include <fmt/format.h>
 
 void get_collection_status_over_unreliabile_network()
 {
@@ -916,15 +926,10 @@ void get_collection_status_over_unreliabile_network()
     // The most important thing to understand about this function is the function-like
     // object that will be invoked. It is up to the developer to instruct "with_durability"
     // of when the set of operations have succeeded or failed, etc.
-    //
-    // See the following for more details:
-    //
-    //     https://github.com/irods/irods/blob/master/lib/core/include/with_durability.hpp
-    //
     auto exec_result = ix::with_durability(ix::retries{5}, ix::delay_multiplier{2.f}, [&] {
         try {
-            auto conn_pool = irods::make_connection_pool();
-            s = fs::client::status(conn_pool->get_connection(), "/tempZone/home/rods");
+            ix::client_connection conn;
+            s = fs::client::status(conn, "/tempZone/home/rods");
             return ix::execution_result::success;
         }
         catch (const fs::filesystem_error&) {
@@ -941,7 +946,7 @@ void get_collection_status_over_unreliabile_network()
     }
 
     // Print whether the collection exists.
-    std::cout << "Status of collection: " << fs::client::exists(s) << '\n';
+    fmt::print("Status of collection: {}\n", fs::client::exists(s));
 }
 ```
 
