@@ -21,8 +21,9 @@ void connecting_to_an_irods_server()
 {
     rodsEnv env;
 
+    // Load the client connection information from $HOME/.irods/irods_environment.json.
+    // This information will be stored in "env" and used to connect to an iRODS server.
     if (const int ec = getRodsEnv(&env); ec != 0) {
-        // Failed to load the local environment information (i.e. irods_environment.json).
         // Handle error.
         return;
     }
@@ -74,10 +75,8 @@ Demonstrates how to use `rclOpenCollection`, `rclReadCollection` and `rclCloseCo
 
 #include <fmt/format.h>
 
-void iterating_over_a_collection()
+void iterating_over_a_collection(RcComm* conn)
 {
-    RcComm* conn = // Our iRODS connection.
-
     // We need a handle to manage the state between the client and server.
     //
     // The curly braces here are important (in C++) because they instruct the compiler to zero
@@ -166,10 +165,8 @@ Demonstrates how to use `rcGenQuery` to fetch information from the catalog.
 
 #include <fmt/format.h>
 
-void fetch_resource_information_using_a_general_query()
+void fetch_resource_information_using_a_general_query(RcComm* conn)
 {
-    RcComm* conn = // Our iRODS connection.
-
     GenQueryInp input{}; // Curly braces are equivalent to using std::memset to clear the object.
 
     // Fetch the maximum number of rows for a single page.
@@ -177,8 +174,8 @@ void fetch_resource_information_using_a_general_query()
     input.maxRows = MAX_SQL_ROWS;
 
     // Here's where we specify the columns we want to fetch, along with various options.
-    addInxIval(&input.selectInp, COL_R_RESC_ID,   ORDER_BY_DESC /* Sort by resource id in descending order */);
-    addInxIval(&input.selectInp, COL_R_RESC_NAME, 0 /* No special options on this column */);
+    addInxIval(&input.selectInp, COL_R_RESC_ID, ORDER_BY_DESC); // Sort by resource id in descending order.
+    addInxIval(&input.selectInp, COL_R_RESC_NAME, 0);           // No special options on this column.
 
     // We can apply conditions to the query as well.
     // If we wanted to find all resources whose name starts with the letter 'd', we'd do the following.
@@ -254,10 +251,8 @@ Demonstrates how to use `rcSpecificQuery` to fetch information from the catalog.
 
 #include <fmt/format.h>
 
-void fetch_information_about_a_collection_using_a_specific_query()
+void fetch_information_about_a_collection_using_a_specific_query(RcComm* conn)
 {
-    RcComm* conn = // Our iRODS connection.
-
     SpecificQueryInp input{}; // Curly braces are equivalent to using std::memset to clear the object.
 
     // Specific queries are pre-defined SQL statements stored in the catalog.
@@ -506,7 +501,9 @@ Because it implements the ISO C++17 Standard Filesystem library, you may use the
 //
 #include <irods/filesystem.hpp>
 
-void iterating_over_collections()
+struct RcComm;
+
+void iterating_over_collections(RcComm& conn)
 {
     // IMPORTANT!!!
     // ~~~~~~~~~~~~
@@ -520,8 +517,6 @@ void iterating_over_collections()
     // Not all classes and functions require the use of these namespaces.
 
     try {
-        auto conn = // Our iRODS connection.
-
         // Here's an example of how to iterate over a collection on the client-side.
         // Notice how the "client" namespace follows the "fs" namespace alias.
         // This is required by some functions and classes to control which implementation
@@ -584,7 +579,9 @@ Demonstrates how to use `dstream` and `default_transport` to read and write data
 #include <array>
 #include <string>
 
-void write_to_data_object()
+struct RcComm;
+
+void write_to_data_object(RcComm& conn)
 {
     // IMPORTANT!!!
     // ~~~~~~~~~~~~
@@ -593,8 +590,6 @@ void write_to_data_object()
     // library under this namespace could change in the future. Changes are likely
     // to only occur based on feedback from the community.
     namespace io = irods::experimental::io;
-
-    auto conn = // Our iRODS connection.
 
     // Instantiates a new transport object which uses the iRODS protocol to read and
     // write bytes into a data object. Transport objects are designed to be used by IOStreams
@@ -625,11 +620,9 @@ void write_to_data_object()
     out << "Here is some more data ...\n";
 }
 
-void read_from_data_object()
+void read_from_data_object(RcComm& conn)
 {
     namespace io = irods::experimental::io;
-
-    auto conn = // Our iRODS connection.
 
     // See function above for information about this type.
     io::client::default_transport xport{conn};
@@ -700,7 +693,7 @@ void manipulating_keyValuePair_t()
     }
 
     // Extracting a value is easy too.
-    const std::string value = kvp[RESC_HIER_STR_KW];
+    const std::string value = kvp.at(RESC_HIER_STR_KW);
 }
 ```
 
@@ -715,10 +708,12 @@ Demonstrates how to use `irods::query` to query the catalog.
 
 #include <fmt/format.h>
 
-void print_all_resource_names(RcComm& _conn)
+struct RcComm;
+
+void print_all_resource_names(RcComm& conn)
 {
     // Print all resource names known to iRODS.
-    for (auto&& row : irods::query<RcComm>{&_conn, "select RESC_NAME"}) {
+    for (auto&& row : irods::query<RcComm>{&conn, "select RESC_NAME"}) {
         fmt::print("{}\n", row[0]);
     }
 }
@@ -736,10 +731,10 @@ Demonstrates how to construct query iterators via an `irods::experimental::query
 #include <vector>
 #include <string>
 
-void make_query()
-{
-    auto conn = // Our iRODS connection.
+struct RcComm;
 
+void make_query(RcComm& conn)
+{
     // Construct the builder.
     // Builders can be copied and moved.
     irods::experimental::query_builder builder; 
@@ -797,13 +792,16 @@ Demonstrates how to use `irods::query_processor` to asynchronously process each 
 
 ```c++
 #include <irods/query_processor.hpp>
+#include <irods/thread_pool.hpp>
 
 #include <fmt/format.h>
 
 #include <vector>
 #include <mutex>
 
-void process_all_query_results()
+struct RcComm;
+
+void process_all_query_results(RcComm& conn)
 {
     // This will hold all data object absolute paths found by the query processor.
     std::vector<std::string> paths;
@@ -826,8 +824,7 @@ void process_all_query_results()
         paths.push_back(_row[0] + '/' + _row[1]);
     }};
 
-    auto thread_pool = // Our iRODS thread pool.
-    auto conn = // Our iRODS connection.
+    irods::thread_pool thread_pool{4}; // Launch a thread pool with four threads.
 
     // This is how we run the query. Notice how the execute call accepts a thread
     // pool and connection. This allows developers to run queries on different

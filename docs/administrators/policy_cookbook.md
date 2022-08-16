@@ -74,8 +74,8 @@ make_fancy(*name)
 generate_and_use_fancy_metadata_attribute_names
 {
     # Generate metadata attribute names under the "fancy" namespace.
-    *avu_file_path = make_fancy("file_path"); # Creates "fancy::file_path".
-    *avu_file_size = make_fancy("file_size"); # Creates "fancy::file_size".
+    *attr_file_path = make_fancy("file_path"); # Creates "fancy::file_path".
+    *attr_file_size = make_fancy("file_size"); # Creates "fancy::file_size".
 
     # Do something with the variables ...
 }
@@ -184,7 +184,7 @@ Additional documentation can be found at [Using temporaryStorage in the iRODS Ru
 
 This example demonstrates how to simulate user quotas using group quotas.
 
-As of iRODS 4.3.0, support for user quotas has been partially disabled. Please consult `iadmin suq` and the release notes for more information.
+As of iRODS 4.3.0, support for user quotas has been partially disabled. Please consult [iadmin suq](/icommands/administrator/#suq) and the [release notes](/release_notes) for more information.
 
 ### How to do it ...
 
@@ -194,11 +194,9 @@ First, we have to instruct iRODS to enforce quotas. Open `/etc/irods/core.re` an
 ```python
 acRescQuotaPolicy { msiSetRescQuotaPolicy("on"); }
 ```
-We recommend applying this change to all servers in the local zone. That guarantees that all servers enforce the quotas. Keep in mind that this is only a recommendation. You should use a testing environment to verify behavior if you decide not to follow this recommendation.
+When implementing this policy, we recommend applying this change to all servers in the local zone. That guarantees that all servers enforce the quotas. Keep in mind that this is only a recommendation. You should use a testing environment to verify behavior if you decide not to follow this recommendation.
 
-iRODS does not update the quota information following user interaction. To do that, you're going to need to periodically tell iRODS to update the quota information. One way to do that is by running `iadmin cu` periodically. How you do that is up to you. You can use **cron** or any other tool you find convenient to use. The important thing is that the command runs.
-
-With that out the way, we can focus on applying the actual quota.
+iRODS does not update the quota information following user interaction. To do that, you're going to need to periodically tell iRODS to update the quota information. One way to do that is by running [iadmin cu](/icommands/administrators/#cu) periodically. How you do that is up to you. You can use **cron** or any other tool you find convenient to use. The important thing is that the command runs.
 
 #### Step 2: Setup the user quota
 
