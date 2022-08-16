@@ -117,7 +117,7 @@ mutex_try_lock(*mutex) {}
 # Releases the lock on *mutex.
 mutex_unlock(*mutex) {}
 
-# Deallocates resources for *mutex.
+# Deallocates OS resources for *mutex.
 mutex_destroy(*mutex) {}
 ```
 
@@ -176,7 +176,7 @@ And inspect the log file at `/var/log/irods/irods.log`, you'd see a log message 
 }
 ```
 
-The prototype implementation of the Logical Quotas Rule Engine Plugin uses this technique. You can find the implementation at [https://github.com/irods/irods_policy_examples/blob/main/irods_policy_logical_quotas.re](https://github.com/irods/irods_policy_examples/blob/main/irods_policy_logical_quotas.re)
+The prototype implementation of the Logical Quotas Rule Engine Plugin used this technique. You can find the implementation at [https://github.com/irods/irods_policy_examples/blob/main/irods_policy_logical_quotas.re](https://github.com/irods/irods_policy_examples/blob/main/irods_policy_logical_quotas.re)
 
 Additional documentation can be found at [Using temporaryStorage in the iRODS Rule Language](/system_overview/tips_and_tricks/#using-temporarystorage-in-the-irods-rule-language).
 

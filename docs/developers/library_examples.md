@@ -61,7 +61,7 @@ void connecting_to_an_irods_server()
     //
 
     // When done, call rcDisconnect() so that the server knows the client is finished.
-    // This lets the server know it is okay to deallocate resources.
+    // This lets the server know it is okay to deallocate OS resources.
     rcDisconnect(conn);
 }
 ```
@@ -149,7 +149,7 @@ void iterating_over_a_collection(RcComm* conn)
     }
 
     // The "rcl*" collection functions manage memory for us. These functions will free any heap
-    // allocated memory for us. Attempting to free any memory return from "rclReadCollection"
+    // allocated memory for us. Attempting to free any memory returned from "rclReadCollection"
     // will result in a crash.
 
     rclCloseCollection(&handle);
@@ -170,7 +170,7 @@ void fetch_resource_information_using_a_general_query(RcComm* conn)
     GenQueryInp input{}; // Curly braces are equivalent to using std::memset to clear the object.
 
     // Fetch the maximum number of rows for a single page.
-    // This is specific to iRODS. The maximum page size has nothing to do with the database.
+    // This is specific to iRODS. The maximum page size is unrelated to any specific database setting.
     input.maxRows = MAX_SQL_ROWS;
 
     // Here's where we specify the columns we want to fetch, along with various options.
@@ -288,7 +288,7 @@ void fetch_information_about_a_collection_using_a_specific_query(RcComm* conn)
     // IMPORTANT: Specific queries can accept up to ten arguments!
 
     // Fetch the maximum number of rows for a single page.
-    // This is specific to iRODS. The maximum page size has nothing to do with the database.
+    // This is specific to iRODS. The maximum page size is unrelated to any specific database setting.
     input.maxRows = MAX_SQL_ROWS;
 
     // So, we've set up our query. Now, we need to execute it. To do that, "rcSpecificQuery" requires that
