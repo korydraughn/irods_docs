@@ -136,6 +136,7 @@ pep_api_data_obj_put_pre(*INSTANCE_NAME, *COMM, *DATA_OBJ_INPUT, *BYTES_BUFFER, 
 {
     # Capture the logical path of the PUT operation.
     # We can use it later when writing messages to the log file.
+    # Keep in mind that the pre-PEP will always fire before the post-PEP.
     temporaryStorage."logical_path" = *DATA_OBJ_INPUT.objPath;
 }
 
@@ -148,6 +149,8 @@ pep_api_data_obj_put_post(*INSTANCE_NAME, *COMM, *DATA_OBJ_INPUT, *BYTES_BUFFER,
     writeLine("serverLog", "This string, *logical_path, was captured by the pre-PEP and logged by the post-PEP!");
 }
 ```
+!!! Note
+    If you're interested in learning more about PEPs and flow-control, see [Dynamice Policy Enforcement Points](/plugins/dynamic_policy_enforcement_points/#flow-control).
 
 If you run the following commands:
 ```bash
@@ -190,10 +193,11 @@ As of iRODS 4.3.0, support for user quotas has been partially disabled. Please c
 
 #### Step 1: Enable Quota Enforcement
 
-First, we have to instruct iRODS to enforce quotas. Open `/etc/irods/core.re` and change the argument passed to `msiSetRescQuotaPolicy()` from `"off"` to `"on"`. The line you modified should look very similar to the one below.
+First, we have to instruct iRODS to enforce quotas. For historical reasons, we must use `msiSetRescQuotaPolicy()` to do this. Open `/etc/irods/core.re` and change the argument passed to `msiSetRescQuotaPolicy()` from `"off"` to `"on"`. The line you modified should look very similar to the one below.
 ```python
 acRescQuotaPolicy { msiSetRescQuotaPolicy("on"); }
 ```
+
 When implementing this policy, we recommend applying this change to all servers in the local zone. That guarantees that all servers enforce the quotas. Keep in mind that this is only a recommendation. You should use a testing environment to verify behavior if you decide not to follow this recommendation.
 
 iRODS does not update the quota information following user interaction. To do that, you're going to need to periodically tell iRODS to update the quota information. One way to do that is by running [iadmin cu](/icommands/administrator/#cu) periodically. How you do that is up to you. You can use **cron** or any other tool you find convenient to use. The important thing is that the command runs.
