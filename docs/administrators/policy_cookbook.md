@@ -193,7 +193,9 @@ As of iRODS 4.3.0, support for user quotas has been partially disabled. Please c
 
 #### Step 1: Enable Quota Enforcement
 
-First, we have to instruct iRODS to enforce quotas. For historical reasons, we must use `msiSetRescQuotaPolicy()` to do this. Open `/etc/irods/core.re` and change the argument passed to `msiSetRescQuotaPolicy()` from `"off"` to `"on"`. The line you modified should look very similar to the one below.
+First, we have to instruct iRODS to enforce quotas. For historical reasons, we must use `msiSetRescQuotaPolicy()` to do this.
+
+Open `/etc/irods/core.re` and change the argument passed to `msiSetRescQuotaPolicy()` from `"off"` to `"on"`. The line you modified should look very similar to the one below.
 ```python
 acRescQuotaPolicy { msiSetRescQuotaPolicy("on"); }
 ```
