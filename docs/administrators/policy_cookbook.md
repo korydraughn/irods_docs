@@ -149,7 +149,7 @@ pep_api_data_obj_put_post(*INSTANCE_NAME, *COMM, *DATA_OBJ_INPUT, *BYTES_BUFFER,
 }
 ```
 !!! Note
-    Understanding the execution order of PEPs is key to proper usage of `temporaryStorage`. Notice in the example policy that we capture the logical path in the pre-PEP so that we can use it in the post-PEP. If you're interested in learning more about PEPs and flow-control, see [Dynamice Policy Enforcement Points](/plugins/dynamic_policy_enforcement_points/#flow-control).
+    Understanding the execution order of PEPs is key to proper usage of `temporaryStorage`. Notice in the example that we capture the logical path in the pre-PEP so that we can use it in the post-PEP. If you're interested in learning more about PEPs and flow-control, see [Dynamice Policy Enforcement Points](/plugins/dynamic_policy_enforcement_points/#flow-control).
 
 If you run the following commands:
 ```bash
