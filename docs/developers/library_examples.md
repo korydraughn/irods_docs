@@ -952,17 +952,3 @@ void get_collection_status_over_unreliabile_network()
     fmt::print("Status of collection: {}\n", fs::client::exists(s));
 }
 ```
-
-### Coming soon (maybe) ...
-
-- replica lib
-- replica_proxy
-- data_object_proxy
-- replica_state_table
-- replica_access_table
-- logical_locking
-- configuration_reload
-- at_scope_exit
-- scoped_client_identity
-- scoped_client_permission
-- scoped_priviledged_client
