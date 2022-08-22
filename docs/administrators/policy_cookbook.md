@@ -12,7 +12,16 @@ This example demonstrates how to synchronize actively running delay rules using 
 
 ### How to do it ...
 
+The rules in the example below do the following:
+
+- Sequentially launch _N_ number of delay rules
+- Each delay rule waits for a unique piece of metadata to be attached to a collection before doing work
+
+Pay close attention to the use of `wait_for_metadata_signal` and `msiModAVUMetadata`. They are what make this technique possible.
+
 ```python
+# Returns true if "*attribute_name" is attached to "*collection" as metadata.
+# Returns false otherwise.
 is_metadata_attached_to_collection(*collection, *attribute_name)
 {
     *attached = false;
@@ -24,6 +33,8 @@ is_metadata_attached_to_collection(*collection, *attribute_name)
     *attached;
 }
 
+# A convenience rule that acts as a spin-lock.
+# This rule also allows us to write clear and maintainable policy.
 wait_for_metadata_signal(*collection, *attribute_name)
 {
     while (!is_metadata_attached_to_collection(*collection, *attribute_name)) {
@@ -39,15 +50,16 @@ synchronized_delay_rules_example()
     for (*i = 0; *i < *number_of_delay_rules; *i = *i + 1) {
         *signum = *i;
 
-        delay("<INST_NAME>irods_rule_engine_plugin-irods_rule_language-instance</INST_NAME>") {
+        delay('<INST_NAME>irods_rule_engine_plugin-irods_rule_language-instance</INST_NAME>') {
             wait_for_metadata_signal('/tempZone/home/rods', 'irods::signal_*signum');
 
             # Log a message to let the admin know the metadata signal was received.
-            writeLine("serverLog", "Received signal! (irods::signal_*signum)");
+            writeLine('serverLog', 'Received signal! (irods::signal_*signum)');
 
-            # Set metadata for the next delay rule.
+            # Let the next delay rule know it's time to do actual work!
+            # We do that by attaching the correct metadata to the collection.
             *next_signum = *signum + 1;
-            writeLine("serverLog", "Signaling next delay rule (irods::signal_*next_signum) ...");
+            writeLine('serverLog', 'Signaling next delay rule (irods::signal_*next_signum) ...');
             msiModAVUMetadata('-C', '/tempZone/home/rods', 'add', 'irods::lock_*next_signum', 'unused', '');
         }
     }
@@ -127,34 +139,52 @@ This example demonstrates how to share information across multiple PEPs within t
 
 ### How to do it ...
 
-Let's say we have the following rules defined in `/etc/irods/core.re`.
+Let's say we want to log the logical path of a data object every time a client successfully closes it. This means, we expect the client to invoke the following API operations in order:
 
-Pay close attention to the use of `temporaryStorage`. It is the bridge between PEPs within the Native Rule Engine Plugin.
+1. Open
+2. Read/Write
+3. Close
+
+To keep things simple, we'll constrain the example to PEPs triggered by the use of `istream`.
+
+Below, you'll find rules that do exactly what we want. They correctly log the logical path of a data object that was successfully closed. Pay close attention to the PEPs and the use of `temporaryStorage`.
 
 ```python
-pep_api_data_obj_put_pre(*INSTANCE_NAME, *COMM, *DATA_OBJ_INPUT, *BYTES_BUFFER, *PORTAL_OPR_OUTPUT)
+# This PEP will always be triggered before "pep_api_replica_close_post".
+# This PEP's primary job is to capture the logical path so that "pep_api_replica_close_post" can use it.
+# "temporaryStorage" is what allows rules to share information across PEPs in the Native Rule Engine Plugin.
+pep_api_replica_open_post(*INSTANCE_NAME, *COMM, *DATA_OBJ_INPUT, *JSON_OUTPUT)
 {
-    # Capture the logical path of the PUT operation.
-    # We can use it later when writing messages to the log file.
+    # Attach the logical path to "temporaryStorage" using "logical_path" as the key.
+    #
+    # In production-level policy, you need to consider the possibility of key name collisions.
+    # See "Naming Schemes and Conventions" for tips on how to do that.
     temporaryStorage."logical_path" = *DATA_OBJ_INPUT.objPath;
 }
 
-pep_api_data_obj_put_post(*INSTANCE_NAME, *COMM, *DATA_OBJ_INPUT, *BYTES_BUFFER, *PORTAL_OPR_OUTPUT)
+# This PEP will always be triggered after "pep_api_replica_open_post".
+pep_api_replica_close_post(*INSTANCE_NAME, *COMM, *JSON_INPUT)
 {
-    # Fetch the logical path we captured during the call to open.
+    # Notice that this PEP's signature does NOT contain a "*DATA_OBJ_INPUT" parameter.
+    # This means the logical path isn't available to us in that way. Luckily, we attached
+    # it to the "temporaryStorage" object.
+    #
+    # Fetch the logical path we captured during the call to "pep_api_replica_open_post".
     *logical_path = temporaryStorage."logical_path";
 
     # Write a message to the log file containing the full logical path.
-    writeLine("serverLog", "This string, *logical_path, was captured by the pre-PEP and logged by the post-PEP!");
+    writeLine("serverLog", "Successfully closed [*logical_path].");
 }
 ```
-!!! Note
-    Understanding the execution order of PEPs is key to proper usage of `temporaryStorage`. Notice in the example that we capture the logical path in the pre-PEP so that we can use it in the post-PEP. If you're interested in learning more about PEPs and flow-control, see [Dynamice Policy Enforcement Points](/plugins/dynamic_policy_enforcement_points/#flow-control).
 
-If you run the following commands:
+!!! Note
+    Understanding the execution order of PEPs and how to use `temporaryStorage` is key to making this work. If you're interested in learning more about PEPs and flow-control, see [Dynamice Policy Enforcement Points](/plugins/dynamic_policy_enforcement_points/#flow-control).
+
+### Let's see it in action!
+
+Assuming you added the rules above to `/etc/irods/core.re`, if you run the following command:
 ```bash
-$ touch foo
-$ iput foo
+$ echo 'Sharing data across PEPs is easy!' | istream write foo
 ```
 
 And inspect the log file at `/var/log/irods/irods.log`, you'd see a log message similar to the following:
@@ -163,17 +193,17 @@ And inspect the log file at `/var/log/irods/irods.log`, you'd see a log message 
   "log_category": "legacy",
   "log_facility": "local0",
   "log_level": "info",
-  "log_message": "writeLine: inString = This string, /tempZone/home/rods/foo, was captured by the pre-PEP and logged by the post-PEP!\n",
-  "request_api_name": "DATA_OBJ_PUT_AN",
-  "request_api_number": 606,
+  "log_message": "writeLine: inString = Successfully closed [/tempZone/home/rods/foo].\n",
+  "request_api_name": "",
+  "request_api_number": 20004,
   "request_api_version": "d",
   "request_client_user": "rods",
   "request_host": "127.0.0.1",
   "request_proxy_user": "rods",
   "request_release_version": "rods4.3.0",
   "server_host": "38832fb94fff",
-  "server_pid": 24234,
-  "server_timestamp": "2022-07-24T16:39:24.348Z",
+  "server_pid": 1816889,
+  "server_timestamp": "2022-08-22T18:49:27.357Z",
   "server_type": "agent"
 }
 ```
