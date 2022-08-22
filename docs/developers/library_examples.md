@@ -66,7 +66,7 @@ void connecting_to_an_irods_server()
 }
 ```
 
-### Iterating over a collection (client-side)
+### Iterating over a collection
 
 Demonstrates how to use `rclOpenCollection`, `rclReadCollection` and `rclCloseCollection`.
 
@@ -242,7 +242,7 @@ void fetch_resource_information_using_a_general_query(RcComm* conn)
 }
 ```
 
-### Querying the Catalog using Specific Queries (client-side)
+### Querying the Catalog using Specific Queries
 
 Demonstrates how to use `rcSpecificQuery` to fetch information from the catalog.
 
@@ -660,7 +660,6 @@ Demonstrates how to use `irods::key_value_proxy` to manipulate the C data type, 
 
 ```c++
 #include <irods/key_value_proxy.hpp>
-
 #include <irods/dataObjOpen.h>
 #include <irods/stringOpr.h>
 
