@@ -239,7 +239,7 @@ And because of this overlap, the next section still applies.
 
 ## Logging and the rodsLog API
 
-The following environment variables can be set in the service account or in **server_config.json**. The server must be restarted for the options to take effect (`./irodsctl restart`):
+The following environment variables can be set in the service account or in **server_config.json**. The server must be restarted for the options to take effect.
 
 - `spLogLevel=N` - This will send all log messages of `N` or more severe (`1`, or `LOG_SYS_FATAL` is most severe) to the log file. Increasing the log level will increase the number of messages sent to the log file. Setting `spLogLevel` to `8` or more will show the wireline XML packing instructions. This can also be set in the service account's `irods_environment.json` file as `irods_log_level` (and not require a server restart, as each rodsAgent reads this environment file on standup, per incoming iRODS connection).
 
