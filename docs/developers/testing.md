@@ -3,6 +3,12 @@
 !!! Note
     All uses of `python` in this page refer to python 3 (sometimes aliased as `python3`).
 
+## Test mode
+
+iRODS servers can be launched in test mode. This mode adjusts various things to increase the stability of the tests.
+
+When launched in this mode, the server will write all log messages to `/var/lib/irods/log/test_mode_output.log` in addition to the normal locations.
+
 ## Core test suite
 
 The Python `unittest`-based test suite known as the "core" tests is a required verification step in order to release the iRODS server. Verifying the iRODS server before release involves running the core tests in the following configurations for all supported operating systems, and database types and versions:
