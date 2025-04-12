@@ -164,6 +164,31 @@ VALUE must be surrounded by single-quotes and should be a constant value or wild
 
 If a literal '%' or '\_' must be used as part of the value for the query (rather than in a wildcard expression), these can be escaped using a backslash (\\).
 
+### Escaping Bytes and Special Characters
+
+Sometimes you may need to escape a specific byte (or character). GenQuery supports this through the use of hexadecimal encoding.
+
+!!! Note
+    This only applies to **string literals**. That is, the arguments wrapped in single quotes. Only **one byte** can be encoded at a time.
+
+This is achieved by using `\xNN`, where _NN_ is the hexadecimal value of the byte. GenQuery decodes the byte before it reaches the database.
+
+The following example demonstrates how to escape an exclamation mark.
+
+```sh
+iquery "select COLL_NAME, DATA_NAME where DATA_NAME = 'data\x21.txt'"
+```
+
+If the catalog contains a data object by the name, `data!.txt`, then it will be returned by GenQuery.
+
+Embedded single quotes can be escaped by adding another single quote, just like standard SQL. For example:
+
+```sh
+iquery "select COLL_NAME, DATA_NAME where DATA_NAME = 'that''s my data.txt'"
+```
+
+GenQuery will notice the use of double single quotes and collapse them to one single quote before sending to the database. In the case of the example, that means `that''s` will be passed to the database as `that's`.
+
 ### Other Options
 
 There are a few other options that can be used with GenQuery to affect how the results are generated:
