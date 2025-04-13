@@ -230,6 +230,7 @@ Here is the complete list of GenQuery attributes available for use anywhere an A
  - COLL_ZONE_NAME
  - DATA_ACCESS_DATA_ID
  - DATA_ACCESS_NAME
+ - DATA_ACCESS_TIME
  - DATA_ACCESS_TYPE
  - DATA_ACCESS_USER_ID
  - DATA_CHECKSUM
@@ -829,14 +830,16 @@ iquery "select COLL_NAME, DATA_NAME where DATA_NAME = 'that''s my data.txt'"
 
 GenQuery2 will notice the use of double single quotes and collapse them to one single quote before sending to the database. In the case of the example, that means `that''s` will be passed to the database as `that's`.
 
-### Showing Duplicate Entries
+### Duplicate Entries
+
+TODO: Update for changes to DISTINCT keyword. Make sure the rest of the document reflects these changes too. Probably need to update the title to "Counting Entries".
 
 By default, GenQuery2 removes duplicate entries from the resultset.
 
 If you need to view duplicate entries, add `no distinct` after the `select` keyword. For example:
 
 ```sh
-iquery "select no distinct COLL_NAME, DATA_NAME"
+iquery "select COLL_NAME, DATA_NAME"
 ```
 
 ### Casting Data Types
@@ -856,7 +859,7 @@ GenQuery2 provides support for the GROUP-BY clause. The important thing to remem
 Here's an example that calculates the number of data objects in each collection.
 
 ```sh
-iquery "select COLL_NAME, count(DATA_NAME) group by COLL_NAME"
+iquery "select COLL_NAME, count(distinct DATA_NAME) group by COLL_NAME"
 ```
 
 ### Offsets and Limiting the size of a resultset

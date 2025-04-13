@@ -407,4 +407,5 @@ The following are all of the columns representing the system metadata in the tab
  - `modify_ts`: Timestamp which indicates the most recent time that this replica was modified, represented as seconds since the epoch. This will be updated every time this replica is opened for write and modified.
  - `resc_hier`: This column is no longer used by iRODS. The value `EMPTY_RESC_HIER` is used to discourage legacy queries.
  - `resc_id`: Identifier unique to the storage resource which hosts this replica. The identifiers are defined in `R_RESC_MAIN` which contains all of the information about the resources in a given zone.
+ - `access_ts`: Timestamp which indicates the last time that this replica was access, represented as seconds since the epoch. This will be updated when this replica is opened for reading and the appropriate conditions (defined by the administrator) are met.
 

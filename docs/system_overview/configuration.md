@@ -184,8 +184,8 @@ iRODS 5 servers only require a working server_config.json file. All server prope
         "salt_size": 8
     },
 
-    // Contains a set of key-value pairs of the form VARIABLE=VALUE such as "ORACLE_HOME=/full/path"
-    // from the server's environment. This setting can be empty.
+    // Contains a set of key-value pairs of the form VARIABLE=VALUE.
+    // This setting can be empty.
     "environment_variables": {
         "VARIABLE_NAME": "VALUE", // This is an example.
 
@@ -531,6 +531,23 @@ Any changes made to the `server_config.json` file of a running iRODS server will
 ```
 $ kill -HUP $(cat /var/run/irods/irods-server.pid)
 ```
+
+The following configuration properties require a full restart of the server to take effect.
+
+```json
+{
+    "advanced_settings": {
+        "dns_cache": {
+            "shared_memory_size_in_bytes": 5000000
+        },
+        "hostname_cache": {
+            "shared_memory_size_in_bytes": 2500000
+        }
+    }
+}
+```
+
+This applies to configuration properties for access time as well.
 
 ## Host Resolution
 
