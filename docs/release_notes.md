@@ -37,6 +37,8 @@ The latest binary packages for Enterprise Linux 8, Enterprise Linux 9, Ubuntu 20
 
 ### Fixed
 
+- Stop server from incrementing ticket `write-file` count after reaching limit (#2720).
+- Return correct error code to client when ticket limit is exceeded (#2720).
 - Reduce scope of `FILE_PATH_KW` (#4932).
 - Honor logical locking in registration/unregistration APIs (#5763).
 - Fix renaming of collections containing multi-byte characters (#6239).
