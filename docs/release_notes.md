@@ -13,6 +13,7 @@ The latest binary packages for Enterprise Linux 8, Enterprise Linux 9, Ubuntu 20
 ### Changed
 
 - Make `update_deprecated_columns.py` print exception information (#7833).
+- `iinit`: Only non-native authentication schemes force the "iRODS password" prompt (#7948).
 - Enable authentication plugins to accept passwords in requests (#8016).
 - Do not print stacktrace when `irods_environment.json` file is not readable (#8083).
 - GenQuery2: Allow function calls in GROUP-BY clause (#8093).
@@ -22,6 +23,7 @@ The latest binary packages for Enterprise Linux 8, Enterprise Linux 9, Ubuntu 20
 - Invoke `fileNotify` when closing replica (#8586, irods/irods_resource_plugin_s3#2146).
 - GenQuery2: Expose user type through permission-related columns (#8754).
 - Update feature test macros (#8580).
+- Make `iadmin` quota GenQuery use the same query conditions (#8622).
 
 ### Removed
 
@@ -32,6 +34,7 @@ The latest binary packages for Enterprise Linux 8, Enterprise Linux 9, Ubuntu 20
 
 - Deprecate `msiDataObjPut` (#8229).
 - Deprecate `--rlock` and `--wlock` options (#8272).
+- Deprecate macros for advisory lock API (#8272).
 - Deprecate osauth scheme (#8301).
 - Deprecate convenience functions for DNS/Hostname cache configuration properties (#8417).
 - Deprecate control plane and `irods-grid` (#8479).
@@ -59,7 +62,9 @@ The latest binary packages for Enterprise Linux 8, Enterprise Linux 9, Ubuntu 20
 - Fix potential memory leak in `resolveRodsTarget` (#8334).
 - Fix potential `collHandle` memory leaks (#8334).
 - Fix memory leak in `getUtil` (#8334).
+- Fix `rodsPath` memory leaks in `iput` and `iget` (#8334).
 - Limit max value of `maximum_size_for_single_buffer_in_megabytes` for DataObjGet API (#8373).
+- Guarantee `rodsEnv` strings are null-terminated (#8379).
 - Improve `irsync`'s handling for checksum errors (#8384).
 - Update modification time on empty overwrite for copy operation (#8413).
 - Fix redirect bug of client request from Consumer server to Provider server in GenQuery2 API (#8439).
@@ -71,6 +76,8 @@ The latest binary packages for Enterprise Linux 8, Enterprise Linux 9, Ubuntu 20
 - Fix zone reports for server-to-server connect errors (#8607).
 - Remove all existing usage entries when recalculating physical quotas (#8633).
 - Make `imiscsvrinfo` report an error when connected to a server older than 4.3.4 (#8653).
+- Return nonzero when grid configuration APIs report an error (#8671).
+- Clear input struct to avoid segmentation fault in `iget` (#8793).
 - Make physical quota count the largest overrun (#8691).
 - Make total quota update only apply to correct `resc_id` (#8699).
 - Replace spaces with hyphens for agent information (`ips`) (#8733).
