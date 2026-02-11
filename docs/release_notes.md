@@ -12,6 +12,7 @@ The latest binary packages for Enterprise Linux 8, Enterprise Linux 9, Ubuntu 20
 
 ### Changed
 
+- Make `update_deprecated_columns.py` print exception information (#7833).
 - Enable authentication plugins to accept passwords in requests (#8016).
 - Do not print stacktrace when `irods_environment.json` file is not readable (#8083).
 - GenQuery2: Allow function calls in GROUP-BY clause (#8093).
@@ -46,6 +47,7 @@ The latest binary packages for Enterprise Linux 8, Enterprise Linux 9, Ubuntu 20
 - Update modification time of replica on open with `O_TRUNC` (#7128).
 - Fix `ils` page boundary bug involving linkPoint collections (#7712).
 - Do not create target collections or directories during dry-run of `irsync` (#7774).
+- Fix use of MySQL `LIMIT` keyword in `update_deprecated_columns.py` (#7833).
 - Prevent `iinit` from showing native authentication password prompt for non-native authentication schemes (#7948).
 - Make GenQuery2 honor group permissions (#8259).
 - Restore support for `KeyValPair` in Python rule engine plugin (#8265).
