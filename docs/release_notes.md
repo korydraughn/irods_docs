@@ -38,6 +38,10 @@ The latest binary packages for Enterprise Linux 8, Enterprise Linux 9, Ubuntu 20
 - Deprecate osauth scheme (#8301).
 - Deprecate convenience functions for DNS/Hostname cache configuration properties (#8417).
 - Deprecate control plane and `irods-grid` (#8479).
+- Deprecate `iadmin ctime` (#8850).
+- Deprecate `iadmin mkdir` (#8850).
+- Deprecate `iadmin rmdir` (#8850).
+- Deprecate `iadmin ls` (#8850).
 
 ### Fixed
 
