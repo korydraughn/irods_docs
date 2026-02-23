@@ -59,7 +59,7 @@ The latest binary packages for Enterprise Linux 8, Enterprise Linux 9, Ubuntu 20
 - Make GenQuery2 honor group permissions (#8259).
 - Restore support for `KeyValPair` in Python rule engine plugin (#8265).
 - Fix `irsync`'s handling of `ALL_KW` when targeting a single data object (#8295).
-- Check for `nullptr` in in data_object_modify_info API (#8307).
+- Check for `nullptr` in data_object_modify_info API (#8307).
 - Fix memory leak in delay server (#8334).
 - Fix memory leak in native authentication plugin (#8334).
 - Fix memory leaks in client libraries handling `rodsPaths` (#8334).
@@ -88,6 +88,7 @@ The latest binary packages for Enterprise Linux 8, Enterprise Linux 9, Ubuntu 20
 - Use `OWN` permissions instead of `data_owner_name` when calculating physical quota totals (#8750).
 - Fix queries for physical quotas so that quotas are properly processed (#8758).
 - Prevent checksum without status update in replica_close API (#8801).
+- Fix memory leaks stemming from `clearMsParam` (#8857).
 
 ### Added
 
