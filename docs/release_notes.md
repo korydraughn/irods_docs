@@ -56,6 +56,7 @@ The latest binary packages for Enterprise Linux 8, Enterprise Linux 9, Ubuntu 20
 - Do not create target collections or directories during dry-run of `irsync` (#7774).
 - Fix use of MySQL `LIMIT` keyword in `update_deprecated_columns.py` (#7833).
 - Prevent `iinit` from showing native authentication password prompt for non-native authentication schemes (#7948).
+- Fix memory leaks in delay server (#8254, #8575).
 - Make GenQuery2 honor group permissions (#8259).
 - Restore support for `KeyValPair` in Python rule engine plugin (#8265).
 - Fix `irsync`'s handling of `ALL_KW` when targeting a single data object (#8295).
@@ -89,6 +90,9 @@ The latest binary packages for Enterprise Linux 8, Enterprise Linux 9, Ubuntu 20
 - Fix queries for physical quotas so that quotas are properly processed (#8758).
 - Prevent checksum without status update in replica_close API (#8801).
 - Fix memory leaks stemming from `clearMsParam` (#8857).
+- Do not crash delay server when in-memory delay queue buffer is too small (#8859).
+- Fix memory leaks in iRODS Rule Language (#8864).
+- Fix stalling of delay rule processing in delay server by removing unnecessary use of pool memory resource (#8868).
 
 ### Added
 
