@@ -6,7 +6,7 @@ Release Date: 2026-03-02
 
 The iRODS Consortium and RENCI are pleased to announce iRODS 4.3.5.
 
-This release represents a years worth of work to finalize the 4.3 series. It closes 133 issues in service of making this release as stable as possible for deployments which cannot upgrade to iRODS 5 yet.
+This release represents a year's worth of work to finalize the 4.3 series. It closes 133 issues in service of making this release as stable as possible for deployments which cannot upgrade to iRODS 5 yet.
 
 Notable updates include memory leak fixes, various improvements for physical quotas, more deprecations, and better handling of multi-byte characters.
 
