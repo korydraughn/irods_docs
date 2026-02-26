@@ -2,11 +2,13 @@
 
 ## 4.3.5
 
-Release Date: 2026-XX-XX
+Release Date: 2026-03-02
 
 The iRODS Consortium and RENCI are pleased to announce iRODS 4.3.5.
 
-This release ... TODO
+This release represents a years worth of work to finalize the 4.3 series. It closes 133 issues in service of making this release as stable as possible for deployments which cannot upgrade to iRODS 5 yet.
+
+Notable updates include memory leak fixes, various improvements for physical quotas, more deprecations, and better handling of multi-byte characters.
 
 The latest binary packages for Enterprise Linux 8, Enterprise Linux 9, Ubuntu 20.04, Ubuntu 22.04, Ubuntu 24.04, Debian 11, and Debian 12 are available at <https://packages.irods.org/>.
 
@@ -24,6 +26,7 @@ The latest binary packages for Enterprise Linux 8, Enterprise Linux 9, Ubuntu 20
 - GenQuery2: Expose user type through permission-related columns (#8754).
 - Update feature test macros (#8580).
 - Make `iadmin` quota GenQuery use the same query conditions (#8622).
+- Declare package dependency on findutils for Enterprise Linux (#8873).
 
 ### Removed
 
@@ -102,8 +105,8 @@ The latest binary packages for Enterprise Linux 8, Enterprise Linux 9, Ubuntu 20
 - Add new error code - `DEPRECATED_AUTHENTICATION_PLUGIN` (#8391).
 - Serialize `TicketAdminInput` data structure for policy enforcement (#8518).
 
-[Full GitHub commit history for the iRODS server]()
-[Full GitHub commit history for the iCommands]()
+[Full GitHub commit history for the iRODS server](https://github.com/irods/irods/compare/4.3.4...4.3.5)
+[Full GitHub commit history for the iCommands](https://github.com/irods/irods_client_icommands/compare/4.3.4...4.3.5)
 
 ## 4.3.4
 
