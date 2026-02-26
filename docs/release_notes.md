@@ -14,6 +14,7 @@ The latest binary packages for Enterprise Linux 8, Enterprise Linux 9, Ubuntu 20
 
 ### Changed
 
+- `irepl`: Update help text for `-n` and `-S` (#4687).
 - Make `update_deprecated_columns.py` print exception information (#7833).
 - `iinit`: Only non-native authentication schemes force the "iRODS password" prompt (#7948).
 - Enable authentication plugins to accept passwords in requests (#8016).
@@ -21,11 +22,15 @@ The latest binary packages for Enterprise Linux 8, Enterprise Linux 9, Ubuntu 20
 - GenQuery2: Allow function calls in GROUP-BY clause (#8093).
 - GenQuery2: Grant users full control over `DISTINCT` keyword (#8261). 
 - GenQuery2: Allow `DISTINCT` keyword in function calls (#8261).
+- Update help text for `irsync` (#8288).
 - Optimize query performance when adding metadata (#8392).
-- Invoke `fileNotify` when closing replica (#8586, irods/irods_resource_plugin_s3#2146).
-- GenQuery2: Expose user type through permission-related columns (#8754).
+- Update help text for various iCommands (#8451).
 - Update feature test macros (#8580).
+- Invoke `fileNotify` when closing replica (#8586).
+- Update help text for physical quotas `iadmin` subcommands (#8618).
 - Make `iadmin` quota GenQuery use the same query conditions (#8622).
+- Update help text for `itouch` to be more explicit (#8673).
+- GenQuery2: Expose user type through permission-related columns (#8754).
 - Declare package dependency on findutils for Enterprise Linux (#8873).
 
 ### Removed
@@ -79,6 +84,7 @@ The latest binary packages for Enterprise Linux 8, Enterprise Linux 9, Ubuntu 20
 - Unregister replica before unlinking in DataObjUnlink API (#8441).
 - Replace invalid UTF-8 sequences in log messages (#8498).
 - Fix GenQuery2's ability to find objects lacking user permissions (#8546).
+- Fix help text for `igroupadmin` (#8583).
 - Fix `irsync`'s handling of overwrites and checksums involving stale replicas (#8590).
 - Fix double-free/corruption by setting free'd pointers to `nullptr` in network plugins (#8593).
 - Fix zone reports for server-to-server connect errors (#8607).
