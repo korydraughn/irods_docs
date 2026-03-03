@@ -91,12 +91,12 @@ The latest binary packages for Enterprise Linux 8, Enterprise Linux 9, Ubuntu 20
 - Remove all existing usage entries when recalculating physical quotas (#8633).
 - Make `imiscsvrinfo` report an error when connected to a server older than 4.3.4 (#8653).
 - Return nonzero when grid configuration APIs report an error (#8671).
-- Clear input struct to avoid segmentation fault in `iget` (#8793).
 - Make physical quota count the largest overrun (#8691).
 - Make total quota update only apply to correct `resc_id` (#8699).
 - Replace spaces with hyphens for agent information (`ips`) (#8733).
 - Use `OWN` permissions instead of `data_owner_name` when calculating physical quota totals (#8750).
 - Fix queries for physical quotas so that quotas are properly processed (#8758).
+- Clear input struct to avoid segmentation fault in `iget` (#8793).
 - Prevent checksum without status update in replica_close API (#8801).
 - Fix memory leaks stemming from `clearMsParam` (#8857).
 - Do not crash delay server when in-memory delay queue buffer is too small (#8859).
