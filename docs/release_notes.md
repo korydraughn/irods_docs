@@ -2,7 +2,7 @@
 
 ## 4.3.5
 
-Release Date: 2026-03-02
+Release Date: 2026-03-03
 
 The iRODS Consortium and RENCI are pleased to announce iRODS 4.3.5.
 
